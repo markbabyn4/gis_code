@@ -1,0 +1,102 @@
+---
+title: "assessment"
+output: html_document
+---
+
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r code}
+
+
+library(tidyverse)
+
+#class(LondonData)
+LondonData <- read_csv("https://files.datapress.com/london/dataset/ward-profiles-and-atlas/2015-09-24T14:21:24/ward-profiles-excel-version.csv", na = "n/a")
+datatypelist<-data.frame(cbind(lapply(LondonData,class)))
+
+
+
+LondonBoroughs<-LondonData[626:658,]
+LondonData<-data.frame(LondonData)
+#grep (get) me all of the rows from the London Data data frame where the text in column 3 starts with (^) E09
+LondonBoroughs<-LondonData[grep("^E09",LondonData[,3]),]
+#head(LondonBoroughs)
+
+LondonBoroughs<-LondonBoroughs[2:34,]
+LondonBoroughs<-LondonBoroughs[,c(1,19,20,21)]
+#rename the column 1 in LondonBoroughs
+names(LondonBoroughs)[1]<-c("Borough Name")
+
+
+
+#working with Spatial Data
+
+
+
+library(maptools)
+library(RColorBrewer)
+library(classInt)
+library(sp)
+library(rgeos)
+library(tmap)
+library(tmaptools)
+library(sf)
+library(rgdal)
+library(geojsonio)
+
+
+
+
+BoroughMapSF <- read_shape("C:/Users/babyn4/Desktop/GIS-part1/BoundaryData(wards)/england_lad_2011.shp", as.sf = TRUE)
+library(methods)
+#class(BoroughMapSF)
+#class(BoroughMapSP)
+#newSF <- st_as_sf(BoroughMapSP)
+#newSP <- as(newSF, "Spatial")
+#BoroughMapSP <- as(BoroughMapSF, "Spatial")
+
+
+BoroughDataMap <- append_data(BoroughMapSF,LondonData, key.shp = "code", key.data = "New.code", ignore.duplicates = TRUE)
+
+
+library(tmap)
+library(tmaptools)
+tmap_mode("plot")
+
+
+tm_shape(BoroughDataMap) + 
+  tm_polygons("A.Level.Average.Point.Score.Per.Student...2013.14" , 
+              style="jenks",
+              palette="Purples",
+              midpoint=NA) + 
+  tm_compass(position = c("right", "top"),type = "arrow") + 
+  tm_scale_bar(position = c("left", "bottom")) +
+  tm_layout(title = "A.Level.Average.Point.Score.Per.Student", legend.position = c("right", "bottom"))
+```
+Geographic Information Systems and Science - Assessment Part 1
+
+1.Benefits and drawbacks of ArcMap and Command line generated maps	
+To me, the biggest advantage of ArcMap is that it has various of toolboxes to help the user have easier access to handle and visualize their data and maps. Also the user can directly operating the maps,such as zoom in,select elements and also plenty of fantastic tools. Moreover, in ArcMap, users can add other data by creating different layers and using completely different tools without losing the former maps and in each map, which in my opinion is what Command Line generated maps lack of. For R, there are all kinds of packages for the users to explore, which makes the coding part much easier, and sometimes users can simply change several words to draw different maps. Also the command line generated maps give users more access and flexibility to operate the data and cool maps.
+2.Data Sources used in their generation and Workflows used to generate both maps
+For ArcMap, I used 33-LondonBorough shapefile to create a basic map of London Boroughs. And I use ¡®A Level Average Point Score Per Student 2013-2014¡¯ datas to show the differences between London boroughs. By connecting my folder to ArcCatalog -> create a new empty geodatabase -> load the 33 London Boroughs to the new Geodatabase->join the attributes by using Add Attribute Index tool-> set the categories of the map in Properties -> Adding labels such as legends,North Arrow by using Toolbars(Labeling). 
+As in R, I used england_lad_2011.shp file to make the map. Firstly, I installed the packages I need to use,mainly ¡®ggplot2¡¯ and ¡¯rgeos¡¯-> library the packages->import the data to R studio->join the attribute data to some boundaries->using ¡®ggplot¡¯ to create the base map with x and y axis -> colour the map by ¡®A Level Average Point Score Per Student 2013.14¡¯.
+
+
+
+Figure 1 
+![Caption for the picture.](C:/Users/babyn4/Desktop/MASTER/GIS/gis_code/cw1/Assignment.png)
+
+Figure 2
+![Caption for the picture.](C:/Users/babyn4/Desktop/MASTER/GIS/gis_code/cw1/coursework1.1.png)
+
+
+
+
